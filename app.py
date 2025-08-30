@@ -46,5 +46,19 @@ def add():
 
     return render_template("add.html")
 
+
+@app.route('/delete/<int:post_id>')
+def delete(post_id):
+    posts = load_posts()
+
+    # Post mit der gegebenen ID finden und entfernen
+    posts = [post for post in posts if post['id'] != post_id]
+
+    # Aktualisierte Liste speichern
+    save_posts(posts)
+
+    # Zurück zur Startseite
+    return redirect(url_for('index'))
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
