@@ -11,6 +11,12 @@ def save_posts(posts):
     with open("posts.json", "w", encoding="utf-8") as f:
         json.dump(posts, f, indent=4)
 
+def fetch_post_by_id(post_id):
+    posts = load_posts()
+    for post in posts:
+        if post['id'] == post_id:
+            return post
+    return None
 
 @app.route("/")
 def index():
@@ -59,6 +65,36 @@ def delete(post_id):
 
     # Zurück zur Startseite
     return redirect(url_for('index'))
+
+
+@app.route('/update/<int:post_id>', methods=['GET', 'POST'])
+def update(post_id):
+    posts = load_posts()
+    post = fetch_post_by_id(post_id)
+
+    if post is None:
+        return "Post not found", 404
+
+    if request.method == 'POST':
+        # Daten aus dem Formular holen
+        author = request.form.get("author")
+        title = request.form.get("title")
+        content = request.form.get("content")
+
+        # Post in der Liste finden und aktualisieren
+        for i, p in enumerate(posts):
+            if p['id'] == post_id:
+                posts[i]['author'] = author
+                posts[i]['title'] = title
+                posts[i]['content'] = content
+                break
+
+        # Speichern und zurück zur Startseite
+        save_posts(posts)
+        return redirect(url_for('index'))
+
+    # GET request - zeige Update-Formular
+    return render_template('update.html', post=post)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
